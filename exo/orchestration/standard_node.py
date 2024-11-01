@@ -106,6 +106,7 @@ class StandardNode(Node):
 
   async def process_prompt(self, base_shard: Shard, prompt: str, image_str: Optional[str] = None, request_id: Optional[str] = None, inference_state: Optional[str] = None) -> Optional[np.ndarray]:
     shard = self.get_current_shard(base_shard)
+    print(f"Processing {request_id=}, {inference_state=} @ {shard=}")
     asyncio.create_task(
       self.broadcast_opaque_status(
         request_id,
@@ -160,6 +161,7 @@ class StandardNode(Node):
       return
 
     result, inference_state, is_finished = await self.inference_engine.infer_prompt(request_id, shard, prompt, image_str, inference_state=inference_state)
+    print(f"Got result {result=}, {inference_state=}, {is_finished=}")
     is_finished = is_finished or len(self.buffered_token_output[request_id][0]) >= self.max_generate_tokens
     if is_finished:
       self.buffered_token_output[request_id] = (self.buffered_token_output[request_id][0], True)
